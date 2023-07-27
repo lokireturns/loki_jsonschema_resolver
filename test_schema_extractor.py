@@ -1,10 +1,6 @@
 import pytest
-from oas_schema_extractor import (
-    SchemaRefType,
-    evaluate_ref,
-    walk_dictionary,
-    fetch_value_from_ref,
-)
+
+from main import SchemaRefType, evaluate_ref, fetch_value_from_ref, walk_dictionary
 
 
 def test_evaluate_ref() -> None:

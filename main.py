@@ -1,13 +1,13 @@
 import argparse
+import copy
 import json
 import logging
 import os
+import re
 import sys
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Union, Optional
-import re
-import copy
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 LOGGER = logging.getLogger(__file__.split("/")[-1])
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
@@ -362,6 +362,40 @@ def save_dict_to_json(dictionary: Dict[str, Any], file_path: str) -> None:
         json.dump(dictionary, file, indent=2)
 
 
+def _is_targeting_list_item(keys_from_ref_string: List[str]) -> Union[int, None]:
+    """
+    Check if targeting a list item.
+
+    The parent function takes a reference string ref_string and a dictionary
+    data_dict as inputs.
+
+    The reference string is expected to be in the format inspired by JSON $ref syntax and
+    specifies the path to the desired value in the dictionary.
+
+    It starts with # and uses / to separate the keys. If targeting an index within a list,
+    the last character of the reference string is expected to be an integer.
+
+    In order to handle the scenario where the reference string points to a list element,
+    the code checks if the last part of the reference string (i.e., keys[-1]) is an integer.
+
+    If keys[-1] can be successfully converted to an integer, it means that the reference is targeting a
+    specific element within a list, and the index specified by the integer is used to retrieve the value
+    from the list in the data dictionary.
+    """
+    list_index = None
+    try:
+        list_index = int(keys_from_ref_string[-1])
+        LOGGER.debug("Searching for a list item")
+        # If the last element of the keys list is an integer
+        # we need to remove this element from the keys list to access the correct path-
+        # -for the dictionary traversal.
+        keys_from_ref_string.pop(-1)
+        return list_index
+    except (IndexError, ValueError):
+        LOGGER.debug("No references to list index found assuming not searching a list.")
+        return None
+
+
 def fetch_value_from_ref(ref_string: str, data_dict: dict):
     """
     Fetch the value from a dictionary based on a reference string inspired by JSON $ref syntax.
@@ -411,14 +445,7 @@ def fetch_value_from_ref(ref_string: str, data_dict: dict):
     keys = ref_string[2:].split("/")
     current_output = data_dict
 
-    list_index = None
-    try:
-        list_index = int(keys[-1])
-        LOGGER.debug("Searching for a list item")
-        keys.pop(-1)
-    except IndexError:
-        LOGGER.debug("No references to list index found assuming not searching a list.")
-        pass
+    list_index = _is_targeting_list_item(keys_from_ref_string=keys)
 
     # Traverse the dictionary using the keys
     for key in keys:
@@ -426,6 +453,7 @@ def fetch_value_from_ref(ref_string: str, data_dict: dict):
             pass
         else:
             current_output = current_output[key]
+
     # Return the value corresponding to the reference string
     if "/enum/" in ref_string.lower() and list_index is not None:
         LOGGER.debug("Searching for a specific enum value")
@@ -441,7 +469,7 @@ def fetch_value_from_ref(ref_string: str, data_dict: dict):
     return current_output
 
 
-def resolve_references(target_path: str, output_path: str) -> None:
+def resolve_references(target_path: str) -> None:
     """
     We only process top level files at the target path.
 
@@ -564,9 +592,6 @@ if __name__ == "__main__":
         required=True,
     )
     parser.add_argument(
-        "-o", "--output_path", help="Specify the output path", required=True
-    )
-    parser.add_argument(
         "-ll",
         "--logging_level",
         help="One of [info, warning, debug or error]",
@@ -606,4 +631,4 @@ if __name__ == "__main__":
             data = json.load(data_file)
             save_dict_to_json(dictionary=data, file_path=file_path)
     else:
-        resolve_references(args.target_path, args.output_path)
+        resolve_references(args.target_path)
