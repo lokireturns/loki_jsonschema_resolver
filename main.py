@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 LOGGER = logging.getLogger(__file__.split("/")[-1])
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+logging.basicConfig(stream=sys.stdout, level=logging.ERROR)
 
 
 def find_files_with_extension(folder_path: str, extension: str) -> List[str]:
@@ -291,8 +291,6 @@ def walk_and_merge_references(
     is found then the value in the target schema is replaced with the value of sub_schema
     coming from the reference schema dict.
     """
-    if "fee.interface" in file_path:
-        LOGGER.setLevel(level=logging.WARNING)
     if isinstance(arb_object, dict):
         """
         So if its an objects such as:
@@ -317,7 +315,7 @@ def walk_and_merge_references(
                             try:
                                 kept_keys.update(copy.deepcopy(arb_object[key_to_keep]))
                             except KeyError:
-                                LOGGER.error(f"Cannot keep key: {key_to_keep}")
+                                LOGGER.debug(f"Cannot keep key: {key_to_keep}")
                                 pass
                     arb_object.clear()
                     arb_object.update(ref_schema)
@@ -549,7 +547,6 @@ def resolve_references(target_path: str) -> None:
                         # check if subschema has unresolved refs
                         has_refs = walk_references(schema=sub_schema)
                         if has_refs:
-                            LOGGER.debug(f"{file_path} has been deferred")
                             break
                         else:
                             sub_schemas.append(
@@ -580,6 +577,8 @@ def resolve_references(target_path: str) -> None:
                     still_refs_found: List[str] = walk_references(oas_spec)
                     if not still_refs_found:
                         index = deferred_files.index(file_path)
+                        # Check only 1 `properties` attribute in top level keys
+                        assert list(resolved.keys()).count("properties") == 0
                         deferred_files.pop(index)
 
 
@@ -627,6 +626,7 @@ if __name__ == "__main__":
             folder_path=args.target_path, extension=".json"
         )
         for file_path in json_file_paths:
+            LOGGER.debug(f"Resetting {file_path}")
             data_file = open(file_path)
             data = json.load(data_file)
             save_dict_to_json(dictionary=data, file_path=file_path)
