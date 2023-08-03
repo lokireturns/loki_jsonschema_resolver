@@ -52,13 +52,18 @@ repos:
       - id: python-no-eval
       - id: python-check-mock-methods
 
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.16.1
+    hooks:
+      - id: gitleaks
+
   - repo: local
     hooks:
       - id: pytest-check
         name: pytest-check
         # Execute from virtualenv
         # Exclude end_to_end tests
-        entry: .venv/bin/pytest -m 'not end_to_end'
+        entry: .venv/bin/pytest
         language: system
         pass_filenames: false
         always_run: true
