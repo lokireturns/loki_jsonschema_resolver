@@ -13,4 +13,4 @@ license = {text = "MIT License"}
 Source = "https://github.com/lokireturns/loki_jsonschema_resolver"
 
 [project.scripts]
-fruit-cli = 'loki_jsonschema_resolver.ref_resolver:main'
+loki-jsonschema-resolver-cli = 'loki_jsonschema_resolver.ref_resolver:main'
