@@ -582,7 +582,7 @@ def resolve_references(target_path: str) -> None:
                         deferred_files.pop(index)
 
 
-if __name__ == "__main__":
+def main() -> None:
     parser = argparse.ArgumentParser(description="CLI Tool")
     parser.add_argument(
         "-t",
@@ -632,3 +632,7 @@ if __name__ == "__main__":
             save_dict_to_json(dictionary=data, file_path=file_path)
     else:
         resolve_references(args.target_path)
+
+
+if __name__ == "__main__":
+    main()
