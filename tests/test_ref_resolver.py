@@ -1,6 +1,11 @@
 import pytest
 
-from main import SchemaRefType, evaluate_ref, fetch_value_from_ref, walk_dictionary
+from loki_jsonschema_resolver.ref_resolver import (
+    SchemaRefType,
+    evaluate_ref,
+    fetch_value_from_ref,
+    walk_dictionary,
+)
 
 
 def test_evaluate_ref() -> None:

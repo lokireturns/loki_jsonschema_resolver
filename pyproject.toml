@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+
+[project]
+name = "loki_jsonschema_resolver"
+version = "0.1.0"
+description = "A ref resolver for Json Schema files."
+authors = [{ name = "Chachi Pereira", email = "hangs_sedans_09@icloud.com" }]
+readme = "README.md"
+license = {text = "MIT License"}
+
+[project.urls]
+Source = "https://github.com/lokireturns/loki_jsonschema_resolver"
+
+[project.scripts]
+loki-jsonschema-resolver-cli = 'loki_jsonschema_resolver.ref_resolver:main'
