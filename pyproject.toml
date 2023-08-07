@@ -7,7 +7,7 @@ version = "0.1.0"
 description = "A ref resolver for Json Schema files."
 authors = [{ name = "Chachi Pereira", email = "hangs_sedans_09@icloud.com" }]
 readme = "README.md"
-license = "MIT"
+license = {text = "MIT License"}
 
 [project.urls]
 Source = "https://github.com/lokireturns/loki_jsonschema_resolver"
